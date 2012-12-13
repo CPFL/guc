@@ -1,0 +1,87 @@
+#!/usr/bin/perl
+
+$machine = '';
+
+if(@ARGV == 0){
+    print "USAGE: datalist -m (hub/gpc) *.bytelist\n";
+    exit;
+}
+
+open INDATA, '<', $ARGV[0];
+open INCODE, '<', $ARGV[1];
+
+for($i = 0; $i < @ARGV; $i++){
+  if($ARGV[$i] eq '-m'){
+    $machine = $ARGV[$i+1];
+}}
+
+$output_name = sprintf("nvc0_ctxctl.h.%s",$machine);
+
+
+open OUT, '>', $output_name;
+binmode OUT;
+$i=0;
+
+$a = sprintf("static const uint8_t nvc0_gr%s_data[] =\n{\n\t",$machine);
+print OUT $a;
+
+while ($line = <INDATA>) {
+    if ($line !~ /^\/\//) {
+        $line =~ s/\n//g;
+        $byte1 = sprintf("%s", $line);
+
+        print OUT $byte1;
+        $i++;
+        if($i == 8){
+          $a = sprintf("\n\t");
+          print OUT $a;
+          $i = 0;
+        }
+    }
+}
+
+$a = sprintf("\n};");
+print OUT $a;
+
+#codestart
+
+$i=0;
+$j=0;
+
+$a = sprintf("static const uint8_t nvc0_gr%s_code[] =\n{\n\t",$machine);
+print OUT $a;
+
+while ($line = <INCODE>) {
+    if ($line !~ /^\/\//) {
+        $line =~ s/\n//g;
+        $byte1 = sprintf("%s", $line);
+
+        print OUT $byte1;
+        $i++;
+        $j++;
+	if($i == 8){
+          $a = sprintf("\n\t");
+          print OUT $a;
+          $i = 0;
+        }
+    }
+}
+print $j;
+while(($j++ % 0xfc) !=0){
+    	$a = sprintf("0x00,");
+	print OUT $a;
+	if(++$i == 8){
+	    $a = sprintf("\n\t");
+	    print OUT $a;
+	    $i = 0;
+	}
+    }
+
+
+$a = sprintf("\n};");
+print OUT $a;
+
+
+close OUT;
+close INDATA;
+close INCODE;

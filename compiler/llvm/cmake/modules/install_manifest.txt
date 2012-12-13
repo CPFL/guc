@@ -1,0 +1,3 @@
+/usr/local/share/llvm/cmake/LLVM.cmake
+/usr/local/share/llvm/cmake/LLVMConfig.cmake
+/usr/local/share/llvm/cmake/LLVMLibDeps.cmake

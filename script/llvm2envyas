@@ -1,0 +1,243 @@
+#!/usr/bin/perl
+#
+# llvm2envyas.pl: Copyright (C) Shinpei Kato <shinpei@il.is.s.u-tokyo.ac.jp>
+# 
+# This is a script to transform the LLVM assembly language into 
+# the format that can be input to the PathScale envyas tool.
+#
+
+# file names
+$file = '';
+$code = 'code.S';
+$data = 'data.S';
+# data array
+@data_info = ();
+$nobj = 0;
+# index for @data_info
+$NAME = 0;
+$ADDR = 1;
+
+for ($i = 0; $i < @ARGV; $i++) {
+    if ($ARGV[$i] eq '-c') {
+	$code = $ARGV[$i+1];
+	$i++;
+    }
+    elsif ($ARGV[$i] eq '-d') {
+	$data = $ARGV[$i+1];
+	$i++;
+    }
+    elsif ($ARGV[$i] =~ /^\-/) {
+	print "Invalid option: " . $ARGV[$i] . "\n";
+	exit;
+    }
+    else {
+	$file = $ARGV[$i];
+    }
+}
+
+&datagen();
+&codegen();
+
+exit;
+
+sub datagen {
+    my $pos = 0;
+    open FILE, $file;
+    open OUT, '>', $data;
+    while ($line = <FILE>) {
+	# find @object sections
+	if ($line =~ /^\t\.type\t.*,\@object.*/) {
+	    $line =~ s/(\t\.type\t)(.*)(,\@object.*\n)/$2/;
+		# save the object name
+	    $data_info[$nobj][$NAME] = $line;
+            # print "$line\n";
+	    while ($line = <FILE>) {
+		# .globl or .comm?
+		if ($line =~ /\.globl/) {
+		    # if it's .globl, get alignment information from 
+		    # the new line
+		    $line = <FILE>;
+		    $line =~ /(\t.align\t)(.*)/;
+
+		    my $align = $2 + 0;
+
+		    # fill in zero to align the data location
+		    if ($pos % $align != 0) {
+			print OUT "// fill zero for alignment\n";
+			my $start = $align;
+			while ($start < $pos) {
+			    $start += $align;
+			}
+			for ($pos; $pos < $start; $pos += 4) {
+			    print OUT "0x0\n";
+			}
+		    }
+
+		    # save the object location
+		    $data_info[$nobj][$ADDR] = $pos;
+
+		    # print the object location and name
+		    my $hexpos = sprintf("0x%x", $pos);
+		    print OUT "// " . $hexpos . ": " .
+			$data_info[$nobj][$NAME] . "\n";
+		    $nobj++;
+
+		    # output data
+		    my $size = 0;
+		    while ($line = <FILE>) {
+			# all ".long" data go to the data section
+			if ($line =~ /\.long/) {
+			    $line =~ /(\t.long\t)(.*)/;
+			    my $val = $2 + 0;
+			    my $str = sprintf("0x%x\n", $val);
+			    print OUT $str;
+			    $size += 4;
+			}
+			elsif ($line =~ /\.zero/) {
+			    $line =~ /(\t.zero\t)(.*)/;
+			    my $nzero = $2 + 0;
+			    for ($j = 0; $j < $nzero; $j++) {
+				print OUT "0x0\n";
+				$size++;
+			    }
+			}
+			# ".size" is used as termination
+			elsif ($line =~ /\.size/) {
+			    $line =~ /(\t.size\t)(.*, )(.*)/;
+			    my $val = $3 + 0;
+			    if ($size != $val) {
+				print "Size unmatched: " . 
+				    $size . "!=" . $val . "\n";
+				goto dataout;
+			    }
+			    $pos += $size;
+			    last;
+			}
+		    }
+		    last;
+		}
+		elsif ($line =~ /\.comm/) {
+		    # if it's .comm, get alignment information and size
+		    # from the same line
+		    $line =~ /(\t.comm\t.*),(.*),(.*)/;
+		    my $size = $2 + 0;
+		    my $align = $3 + 0;
+
+		    # fill in zero to align the data location
+		    if ($pos % $align != 0) {
+			my $start = $align;
+			while ($start < $pos) {
+			    $start += $align;
+			}
+			for ($pos; $pos < $start; $pos += 4) {
+			    print OUT "0x0\n";
+			}
+		    }
+
+		    # save the object location
+		    $data_info[$nobj][$ADDR] = $pos;
+
+		    # print the object location and name
+		    my $hexpos = sprintf("0x%x", $pos);
+		    print OUT "// " . $hexpos . ": " .
+			$data_info[$nobj][$NAME] . "\n";
+		    $nobj++;
+
+		    # output data
+		    my $end = $pos + $size;
+		    for ($pos; $pos < $end; $pos += 4) {
+			print OUT "0x0\n";
+		    }
+		    last;
+		}
+	    }
+	}
+    }
+  dataout:
+    close OUT;
+    close FILE;
+}
+
+sub codegen {
+    open FILE, $file;
+    open OUT, '>', $code;
+    while ($line = <FILE>) {
+
+	if ($line =~ /\.b8/) { # unknown insns
+	    print OUT $line;	
+	}
+	elsif ($line =~ /^\t\./ || $line =~/APP/ || $line =~/Ltmp/) {
+	    # skip all directives.
+	}
+	else {
+	    # format ld b32 REG SYMBOL(REG) ->
+	    # add b32 $r0 REG ADDR
+	    # ld b32 REG D[$r0]
+	    if ($line =~ /^\tld b32\t(.*)\s(.*)\((\$r.*)\)/) {
+		$addr = sprintf("0x%x", &get_address($2));
+		$reg = $3;
+		print OUT "\tadd b32\t\$r0 " . $reg . " " . $addr . "\n";
+		$line = "\tld b32\t" . $1 . " D[\$r0]\n";
+	    }
+	    # format st b32 SYMBOL(REG) REG ->
+	    # add b32 $r0 REG ADDR(SYMBOL)
+	    # st b32 D[$r0] REG
+	    elsif ($line =~ /^\tst b32\t(.*)\((\$r.*)\)\s(.*)/) {
+		$addr = sprintf("0x%x", &get_address($1));
+		$reg = $2;
+		print OUT "\tadd b32\t\$r0 " . $reg . " " . $addr . "\n";
+		$line = "\tst b32\tD[\$r0] " . $3 . "\n";
+	    }
+
+	    # format &SYMBOL -> ADDR
+	    if ($line =~ /(.*)\&([0-9a-zA-Z_]*)\s(.*)/) {
+		$addr = sprintf("0x%x", &get_address($2));
+		print OUT "\tclear b32 \$r0\n";
+		print OUT "\tmov\t\$r0 " . $addr . "\n";
+		$line =~ s/(.*)(\&[0-9a-zA-Z_]*)(\s.*)/$1D[\$r0]$3/;
+	    }
+
+	    # format #SYMBOL -> ADDR
+	    if ($line =~ /(.*) \#([0-9a-zA-Z_]*)/ ) {
+		$expr = $1;
+		$x = &get_address($2);
+		# address should not be greater than 16-bit, 
+		# but just to make sure, deal with sethi.
+		if ($line =~/sethi/) {
+		    $x &= 0xffff0000;
+		}
+		else {
+		    $x &= 0x0000ffff;
+		}
+		$addr = sprintf("0x%x", $x);
+		$line =~ s/(.*)(\#[0-9a-zA-Z_]*)/$expr $addr/;
+	    }
+
+	    # format branch labels.
+	    # assume that now only the labels contain the period.
+	    $line =~ s/\./\#/;
+	    
+	    # format function labels.
+	    # assume that now only the labels contain the sharp.
+	    $line =~ s/\#//;
+
+	    # now, print insns.
+	    print OUT $line;
+	}
+    }
+    close OUT;
+    close FILE;
+}
+
+sub get_address {
+    $symbol = $_[0];
+    #  print "$symbol\n";
+    for ($i = 0; $i < $nobj; $i++) {
+      #  print "\t $data_info[$i][$NAME]\n";
+	if ($symbol eq $data_info[$i][$NAME]) {
+          #   print "\tSuccess\n";
+	    return $data_info[$i][$ADDR];
+	}
+    }
+    return 0;
+}
