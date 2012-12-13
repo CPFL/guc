@@ -269,16 +269,9 @@ def MOVri: Pseudo<(outs GR32:$dst), (ins sext32imm:$src),
                   "mov\t{$dst $src}",
                   []>;
 /*fix*/
-/*
 def MOV16ri: Pseudo<(outs GR32:$dst), (ins sext16imm:$src),
                     "clear b32 {$dst}\n\tmov\t{$dst $src}",
                     [(set GR32:$dst, SExtLO16imm:$src)]>;
-*/
-
-def MOV16ri: Pseudo<(outs GR32:$dst), (ins sext16imm:$src),
-                    "mov\t{$dst $src}\n\tsethi\t{$dst} 0",
-                    [(set GR32:$dst, SExtLO16imm:$src)]>;
-
 
 def MOVrz: Pseudo<(outs GR32:$dst), (ins i32imm:$src),
                   "clear b32 {$dst}",
