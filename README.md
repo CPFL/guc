@@ -1,7 +1,7 @@
-
 # GUC - GPU Microcontroller Compiler
 
 GUC is a compiler for GPU microcontroller.
+GUC has supporting fμc microcontrollers architecture.
 
 #Installation Docs:
 
@@ -45,16 +45,25 @@ Please follow the instruction below to install envytools.
 ###Execution test
     sudo make run
 
-#Sample program
+##Sample program
 GUC have included a sample of some.
+Summarize belows:
 
-
-
+    test_br: This is a compilation test program of the branch.
+    test_func: This is a compilation test program of the function.
+    test_sp: This is a compilation test program of the iterative process.
+    
+    test_intr: The fuc has intrrupt handler. This program is using intrrupt.
+    test_timer: The fuc has timer. This code is sample of using the timer intterupt.
+    test_xfer: Xfer is the data transfer feature of fuc. This code is sample of using the xfer.
+    
+# Related research papers 
+Yusuke Fujii, Takuya Azumi, Nobuhiko Nishio, Shinpei Kato. "Exploring Microcontrollers in GPUs",
+to appear at the 4th Asia-Pacific Workshop on Systems(APSYS 2013), Singapore, 2013
 
 #Licence
 -----------  
- Copyright (C) Yusuke Fujii <yukke@ubi.cs.ritsumei.ac.jp>
- 	       Shinpei Kato
+ Copyright (C) Yusuke Fujii <yukke@ubi.cs.ritsumei.ac.jp>, Shinpei Kato
 
  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
