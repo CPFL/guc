@@ -25,11 +25,11 @@ void ihbody1(void)
     unsigned int intr = mmio_read(0x08);
  
     mmio_write(0x04,0x1);
-    //if(intr == 0x1){
+  //  if(intr == 0x1){
 	mmio_write(0x800,mmio_read(0x0800)+1);
-    //}
+  //  }
     k++;
-    //mmio_write(0x28,1);
+ //   mmio_write(0x28,1);
 }
 
 
@@ -41,7 +41,7 @@ int main(void)
     int i=0;
     mmio_write(FUC_ACCESS_EN,FUC_AE_BIT_FIFO);
     mmio_write(0x04,0xffffffff);//intr_line all reset
-   mmio_write(0x0c,0xfc04);
+    mmio_write(0x0c,0xfc04);
     mmio_write(0x20,0xfffffff);// timer period
     mmio_write(0x24,0xfffffff);// current timer
     mmio_write(0x28,0x1); //timer enabled

@@ -49,8 +49,6 @@ int main(void)
     set_flags($p2);
     set_flags(ie0);
 
-    
-    //mmio_write(FUC_NEWSCRATCH1,0x600dc0de);
 
      mmio_write(0xc24, 0xffffffff);//INTR_UP_ENABLE??
     

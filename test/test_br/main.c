@@ -1,5 +1,5 @@
 /*
- * main.c: Copyright (C) Shinpei Kato <shinpei@il.is.s.u-tokyo.ac.jp>
+ * main.c: copyright (c) shinpei kato <shinpei@il.is.s.u-tokyo.ac.jp>
  */
 
 #include "asminsn.h"

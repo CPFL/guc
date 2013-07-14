@@ -60,9 +60,9 @@ int finish_flg=0;
 
 void nvc0_debugunit(int base){
     int i=0,j=0;
- 	int off=0;
-	int temp;
-	int k=0;
+    int off=0;
+    int temp;
+    int k=0;
     printf("PGRAPH: %06x - scratch 0x%08x 0x%08x 0x%08x 0x%08x\n",base,NV_RD32(base + 0x40), NV_RD32(base + 0x44),NV_RD32(base + 0x80),NV_RD32(base + 0x84));
     printf("PGRAPH: %06x - done 0x%08x wrval 0x%08x ctrl 0x%08x\n",base,NV_RD32(base + 0x400),NV_RD32(base + 0x730),NV_RD32(base + 0x728));;
     printf("PGRAPH: %06x - stat 0x%08x 0x%08x 0x%08x 0x%08x\n",base,NV_RD32(base + 0x800), NV_RD32(base + 0x804),NV_RD32(base + 0x808),NV_RD32(base + 0x80c));
@@ -74,14 +74,14 @@ void nvc0_debugunit(int base){
 	    /* mmio read fault check*/
 	    if(i >= 0x508 && i < 0x600){
 	    }else{
-	    /**/
-	    if((temp=NV_RD32(base+i)) == 0){
-		off+=4;
-	    }else{
-	    	printf("[%04x]%08x, ",i,temp);
-		k+=4;
+		/**/
+		if((temp=NV_RD32(base+i)) == 0){
+		    off+=4;
+		}else{
+		    printf("[%04x]%08x, ",i,temp);
+		    k+=4;
+		}
 	    }
-	}
 	}
 	//i+=j;
 	puts("");
@@ -101,30 +101,30 @@ void nvc0_debug_pcounter(){
 }
 
 void nvc0_debug(){
- int i = NV_RD32(0x40904c);
- if( NV_RD32(0x409500) == 0xbad && finish_flg )exit(1);    
- else if( NV_RD32(0x409500) != 0xbad)finish_flg = 1;
- printf("MicroController shows register: %08d \n",global_time++);
- printf("CMD(504) = %08x, DATA(500) = %08x\n",NV_RD32(0x409504),NV_RD32(0x409500));
- printf(" CMD(68) = %08x, DATA(64)  = %08x\n",NV_RD32(0x409068),NV_RD32(0x409064));
- printf("INTR EN_ST(18) = %08x, INTR_MASK(1c)  = %08x\n",NV_RD32(0x409018),NV_RD32(0x40901c));
- printf("INTR TIMER(24) = %08x, TI_ENABLE(28)  = %08x\n",NV_RD32(0x409024),NV_RD32(0x409028));
- printf("INTR    ST(08) = %08x, TI_MODE  (0c)  = %08x\n",NV_RD32(0x409008),NV_RD32(0x40900c));
- printf("-HUB- busy? %d\n",i&0x1);
- nvc0_debugunit(0x409000);
+    int i = NV_RD32(0x40904c);
+    if( NV_RD32(0x409500) == 0xbad && finish_flg )exit(1);    
+    else if( NV_RD32(0x409500) != 0xbad)finish_flg = 1;
+    printf("MicroController shows register: %08d \n",global_time++);
+    printf("CMD(504) = %08x, DATA(500) = %08x\n",NV_RD32(0x409504),NV_RD32(0x409500));
+    printf(" CMD(68) = %08x, DATA(64)  = %08x\n",NV_RD32(0x409068),NV_RD32(0x409064));
+    printf("INTR EN_ST(18) = %08x, INTR_MASK(1c)  = %08x\n",NV_RD32(0x409018),NV_RD32(0x40901c));
+    printf("INTR TIMER(24) = %08x, TI_ENABLE(28)  = %08x\n",NV_RD32(0x409024),NV_RD32(0x409028));
+    printf("INTR    ST(08) = %08x, TI_MODE  (0c)  = %08x\n",NV_RD32(0x409008),NV_RD32(0x40900c));
+    printf("-HUB- busy? %d\n",i&0x1);
+    nvc0_debugunit(0x409000);
 #ifdef PRINT_PCOUNTER
- nvc0_debug_pcounter();
+    nvc0_debug_pcounter();
 #endif
 #ifdef PRINT_PDAEMON
- // printf("\n-PDAEMON-\n");
-// nvc0_debugunit(0x10a000);
+    // printf("\n-PDAEMON-\n");
+    // nvc0_debugunit(0x10a000);
 #endif
 #ifdef PRINT_PGRAPH_GPC
-//printf("\n-GPC-\n");
- //nvc0_debugunit(0x502000);
- //nvc0_debugunit(0x50a000);
- //nvc0_debugunit(0x512000);
- //nvc0_debugunit(0x51a000);
+    //printf("\n-GPC-\n");
+    //nvc0_debugunit(0x502000);
+    //nvc0_debugunit(0x50a000);
+    //nvc0_debugunit(0x512000);
+    //nvc0_debugunit(0x51a000);
 #endif
 }
 
@@ -133,12 +133,12 @@ int init_device(void)
     /* init PCI. */
     init();
 
-  //  /* reset engine. */
-  //  NV_WR32(0x200, 0xfffd3ffd);
-  //  NV_WR32(0x200, 0xffffffff);
-  //  NV_WR32(0x200, NV_RD32(0x200) & 0xffffefff);
-  //  NV_WR32(0x200, NV_RD32(0x200) | 0x00001000);
-   // sleep(1);
+    //  /* reset engine. */
+    //  NV_WR32(0x200, 0xfffd3ffd);
+    //  NV_WR32(0x200, 0xffffffff);
+    //  NV_WR32(0x200, NV_RD32(0x200) & 0xffffefff);
+    //  NV_WR32(0x200, NV_RD32(0x200) | 0x00001000);
+    // sleep(1);
 
     return TRUE;
 }
@@ -153,19 +153,19 @@ int main(int argc, char **argv)
     int print_flg=0;
     char def[1]="a";
     if(argv[1] == NULL){
-    	printf("usage: monitor <time> [-a]\nDefault time is 500msec\n");
+	printf("usage: monitor <time> [-a]\nDefault time is 500msec\n");
     }else if(strcmp(argv[1], "-a") == 0 ){
-   	print_flg=1;
+	print_flg=1;
 	printf("aiueo");
     }
 
-   // fini_device();
-  
+    // fini_device();
+
     /* init the device. you can't access the fuc until you do this. */
     init_device();
 
     printf("Start monitored Microcontroller\n");
-    
+
     while(1){
 	if(!print_flg){
 	    printf("\x1B[2J");
@@ -175,8 +175,6 @@ int main(int argc, char **argv)
 	usleep(PRINT_PERIODIC);
 	nvc0_debug();
     }
-
-
 
     /* finish the device. */
     fini_device();

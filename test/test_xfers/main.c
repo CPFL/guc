@@ -1,5 +1,6 @@
 /*
- * main.c: Copyright (C) Shinpei Kato <shinpei@il.is.s.u-tokyo.ac.jp>
+ *  main.c: Copyright (C)       Yusuke Fujii <yukke@ubi.cs.ritsumei.ac.jp>
+ * 				Shinpei Kato <shinpei@il.is.s.u-tokyo.ac.jp>
  */
 
 #include "asminsn.h"
@@ -202,11 +203,11 @@ void work(void){
     set4160();
     waitdone_12();
 
-   
-	mmio_write(0xa24, 0);
-	mmio_write(FUC_MEM_CHAN, 0); /* type=nv50_channnel????? */
-	mmio_write(FUC_MEM_CMD, 7);
-	while (mmio_read(FUC_MEM_CMD)&0x1f);
+
+    mmio_write(0xa24, 0);
+    mmio_write(FUC_MEM_CHAN, 0); /* type=nv50_channnel????? */
+    mmio_write(FUC_MEM_CMD, 7);
+    while (mmio_read(FUC_MEM_CMD)&0x1f);
 
     setxferbase(10);
     extr(xdata,0x08020495,28,29);

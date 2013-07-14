@@ -45,6 +45,17 @@ Please follow the instruction below to install envytools.
 ###Execution test
     sudo make run
 
+#Sample program
+    test_br:
+    test_func:
+    test_intr:
+    test_mmctx:
+    test_sp:
+    test_timer:
+    test_xfers:
+
+
+
 #Licence
 -----------  
  Copyright (C) 2012 Yusuke Fujii <yukke@ubi.cs.ritsumei.ac.jp>

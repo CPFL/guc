@@ -405,12 +405,9 @@ void doit(void)
     mmio_write1a(0x100, 2); /* trigger */
     mmio_write09(0x100, 2); /* trigger */
     
- //   while (!mmio_read09(0x008));
-    
     
     /* wait for the fuc to complete executions. */
     
-  /* yukke added code 120510 */
   while(1){
       /* input command */
       printf(">command :  0x");
@@ -431,15 +428,15 @@ void doit(void)
       printf("Send 0x%x command, 0x%x data\n",command,data);
      }
     nvc0_debug();
-     // if(NV_RD32(0x409000+FUC_REG_RETURN) != 1 ){ //wait complete execute
-      //   printf("executed!\n");
-      // break;
+    // if(NV_RD32(0x409000+FUC_REG_RETURN) != 1 ){ //wait complete execute
+    //   printf("executed!\n");
+    // break;
     // }
-   // }
- // if (!mmio_wait09(FUC_REG_RETURN, 1)) {
-  //	printf("Microcontroller hung up...\n");
-   //   }
-  }/* while */  
+    // }
+    // if (!mmio_wait09(FUC_REG_RETURN, 1)) {
+    //	printf("Microcontroller hung up...\n");
+    //   }
+}/* while */  
 
 }
 
